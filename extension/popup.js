@@ -1,4 +1,8 @@
-const backendUrl = 'https://stream-analytics-extension.onrender.com'; // Replace with your actual backend Render URL
+const backendUrl = 'https://stream-analytics-extension.onrender.com';
+// 👇 Only edit this line to put your Twitch Client ID from dev console
+const clientId = '4g69lpny10og91bhgsryaz2w71qnrl'; // <-- REPLACE THIS ONLY
+
+const redirectUri = `${backendUrl}/auth/callback`;
 
 document.addEventListener('DOMContentLoaded', () => {
   const authBtn = document.getElementById('auth-btn');
@@ -6,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const overviewSection = document.getElementById('overview-section');
   const streamStats = document.getElementById('stream-stats');
   const refreshBtn = document.getElementById('refresh-btn');
+  const authSection = document.getElementById('auth-section');
 
   // Check if user already authorized
   chrome.storage.local.get(['userId'], (result) => {
@@ -19,27 +24,20 @@ document.addEventListener('DOMContentLoaded', () => {
   // Auth button action
   authBtn.onclick = () => {
     console.log("Auth button clicked");
+    const twitchAuthUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=channel:read:subscriptions user:read:email`;
+
     chrome.identity.launchWebAuthFlow({
-      url: `${backendUrl}/auth/callback`,
+      url: twitchAuthUrl,
       interactive: true
     }, (redirectUrl) => {
+      console.log("OAuth redirect result:", redirectUrl);
       if (redirectUrl) {
-        // Extract userId from successful auth (simulate with backend API call)
-        fetch(`${backendUrl}/api/user`, {
-          headers: {
-            'Authorization': `Bearer ${getAccessTokenFromRedirect(redirectUrl)}`
-          }
-        })
-        .then(resp => resp.json())
-        .then(data => {
-          chrome.storage.local.set({ userId: data.id });
-          authSection.style.display = 'none';
-          overviewSection.style.display = '';
-          fetchAnalytics(data.id);
-        });
         authStatus.textContent = "Authenticated!";
+        // You can fetch user info or analytics after auth here
+        // Example: Call backend to store/fetch user data
       } else {
         authStatus.textContent = "Authorization failed!";
+        console.log("OAuth failed or user cancelled.");
       }
     });
   };
@@ -70,11 +68,5 @@ document.addEventListener('DOMContentLoaded', () => {
           streamStats.innerHTML = "<p>No completed streams tracked yet.</p>";
         }
       });
-  }
-
-  function getAccessTokenFromRedirect(redirectUrl) {
-    // TODO: Parse access_token from redirectUrl (depends on your server implementation)
-    // For initial prototype, you can hardcode or update as you connect flows.
-    return "";
   }
 });
