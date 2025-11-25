@@ -260,5 +260,5 @@ app.get('/', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`OAuth callback: http://localhost:${PORT}/auth/callback`);
+  console.log(`OAuth callback: ${process.env.BACKEND_URL}/auth/callback`);
 });
