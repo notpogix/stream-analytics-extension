@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Auth button action
   authBtn.onclick = () => {
+    console.log("Auth button clicked");
     chrome.identity.launchWebAuthFlow({
       url: `${backendUrl}/auth/callback`,
       interactive: true
