@@ -1,4 +1,4 @@
-const backendUrl = 'https://YOUR_RENDER_URL.onrender.com'; // Replace with your actual backend Render URL
+const backendUrl = 'https://stream-analytics-extension.onrender.com'; // Replace with your actual backend Render URL
 
 document.addEventListener('DOMContentLoaded', () => {
   const authBtn = document.getElementById('auth-btn');
