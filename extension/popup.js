@@ -23,24 +23,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Auth button action
   authBtn.onclick = () => {
-    console.log("Auth button clicked");
-    const twitchAuthUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=channel:read:subscriptions user:read:email`;
-
-    chrome.identity.launchWebAuthFlow({
-      url: twitchAuthUrl,
-      interactive: true
-    }, (redirectUrl) => {
-      console.log("OAuth redirect result:", redirectUrl);
-      if (redirectUrl) {
+  console.log("Auth button clicked");
+  const twitchAuthUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=channel:read:subscriptions user:read:email`;
+  chrome.identity.launchWebAuthFlow({
+    url: twitchAuthUrl,
+    interactive: true
+  }, (redirectUrl) => {
+    console.log("OAuth redirect result:", redirectUrl);
+    if (redirectUrl && redirectUrl.includes("/auth/success")) {
+      // Parse userId from the URL
+      const userId = new URL(redirectUrl).searchParams.get("userId");
+      if (userId) {
+        chrome.storage.local.set({ userId: userId });
+        authSection.style.display = 'none';
+        overviewSection.style.display = '';
+        fetchAnalytics(userId);
         authStatus.textContent = "Authenticated!";
-        // You can fetch user info or analytics after auth here
-        // Example: Call backend to store/fetch user data
       } else {
         authStatus.textContent = "Authorization failed!";
-        console.log("OAuth failed or user cancelled.");
+        console.log("No userId found in success redirect.");
       }
-    });
-  };
+    } else {
+      authStatus.textContent = "Authorization failed!";
+      console.log("OAuth failed or user cancelled, or wrong redirect.");
+    }
+  });
+};
+
 
   refreshBtn.onclick = () => {
     chrome.storage.local.get(['userId'], (result) => {
