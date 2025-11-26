@@ -88,16 +88,17 @@ app.get('/auth/callback', async (req, res) => {
 
     // Redirect to success page
     res.send(`
-      <html>
-        <body>
-          <h1>✅ Authorization Successful!</h1>
-          <p>You can now close this window and return to the extension.</p>
-          <script>
-            window.close();
-          </script>
-        </body>
-      </html>
-    `);
+  <html>
+    <body>
+      <h1>✅ Authorization Successful!</h1>
+      <p>You can now close this window and return to the extension.</p>
+      <script>
+        window.location = "${process.env.BACKEND_URL}/auth/success?userId=${encodeURIComponent(user.id)}";
+      </script>
+    </body>
+  </html>
+`);
+
   } catch (error) {
     console.error('OAuth error:', error.response?.data || error.message);
     res.status(500).send('Authorization failed');
