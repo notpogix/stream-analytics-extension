@@ -40,7 +40,7 @@ async function getAppAccessToken() {
   }
 }
 
-// Route: OAuth callback (after user authorizes)
+// OAuth callback (after user authorizes)
 app.get('/auth/callback', async (req, res) => {
   const code = req.query.code;
   
@@ -86,18 +86,18 @@ app.get('/auth/callback', async (req, res) => {
     // Start monitoring this channel
     startMonitoringChannel(user.id, access_token);
 
-    // Redirect to success page
+    // Redirect to success page with userId for extension
     res.send(`
-  <html>
-    <body>
-      <h1>✅ Authorization Successful!</h1>
-      <p>You can now close this window and return to the extension.</p>
-      <script>
-        window.location = "${process.env.BACKEND_URL}/auth/success?userId=${encodeURIComponent(user.id)}";
-      </script>
-    </body>
-  </html>
-`);
+      <html>
+        <body>
+          <h1>✅ Authorization Successful!</h1>
+          <p>You can now close this window and return to the extension.</p>
+          <script>
+            window.location = "${process.env.BACKEND_URL}/auth/success?userId=${encodeURIComponent(user.id)}";
+          </script>
+        </body>
+      </html>
+    `);
 
   } catch (error) {
     console.error('OAuth error:', error.response?.data || error.message);
@@ -124,29 +124,29 @@ app.get('/api/analytics/:userId', (req, res) => {
 app.get('/api/check-auth/:userId', (req, res) => {
   const userId = req.params.userId;
   const hasAuth = userTokens.has(userId);
-  
   res.json({ authorized: hasAuth });
 });
 
 // Route: Get current user info from token
 app.get('/api/user', async (req, res) => {
   const authHeader = req.headers.authorization;
-  
   if (!authHeader) {
     return res.status(401).json({ error: 'No authorization header' });
   }
-
   const token = authHeader.replace('Bearer ', '');
-
   try {
     const userResponse = await axios.get('https://api.twitch.tv/helix/users', {
       headers: getTwitchHeaders(token)
     });
-
     res.json(userResponse.data.data[0]);
   } catch (error) {
     res.status(401).json({ error: 'Invalid token' });
   }
+});
+
+// Add the /auth/success route for extension redirects
+app.get('/auth/success', (req, res) => {
+  res.send('<html><body><h1>Authentication Complete!</h1></body></html>');
 });
 
 // Background monitoring function
