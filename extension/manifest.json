@@ -9,7 +9,8 @@
   ],
   "host_permissions": [
     "https://*.twitch.tv/*",
-    "https://*.onrender.com/*"
+  "https://id.twitch.tv/*",
+  "https://stream-analytics-extension.onrender.com/*"
   ],
   "action": {
     "default_popup": "popup.html"
